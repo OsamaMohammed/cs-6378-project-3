@@ -148,7 +148,7 @@ void commandThread() {
     char cmd;
     unsigned short int value;
     while (true) {
-        cout << "Commands r,w,p,c,q,g: ";
+        cout << "Commands Read, Write, Print, Count, Generate, Quit [r,w,p,c,g,q]:";
         cmd = getChar();
         cout << endl;
         switch (cmd) {
