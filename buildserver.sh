@@ -1,0 +1,1 @@
+g++ -pthread -o server main.cpp -std=c++11 -fnon-call-exceptions
