@@ -43,6 +43,7 @@
         "queue": "cpp",
         "stack": "cpp",
         "variant": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "algorithm": "cpp"
     }
 }

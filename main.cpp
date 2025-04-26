@@ -1,16 +1,18 @@
 #include <arpa/inet.h>
+#include <execinfo.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <sys/socket.h>
 #include <termios.h>
 #include <unistd.h>
 
+#include <csignal>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <mutex>
 #include <thread>
-
 using namespace std;
 
 // Socket Listening Port
@@ -24,6 +26,13 @@ array<array<unsigned short int, 2>, 2000> store;
 int storeIndex = 0;
 // mutex for store
 mutex storeMutex;
+// Server Socket identifier
+int serverSocket;
+
+#define READ_REQUEST 1
+#define WRITE_REQUEST 2
+#define RECOVER_REQUEST 3
+#define RECOVER_WRITE 4
 
 // declar array of strings
 array<char *, 7> hosts = {
@@ -66,13 +75,46 @@ unsigned short int readStore(unsigned short int key) {
 }
 
 // Write key to store
-void writeStore(unsigned short int key, unsigned short int value) {
+void writeStore(unsigned short int key, unsigned short int value, bool propigate = true) {
     for (int i = 0; i < storeIndex; i++) {
         if (store[i][0] == key) {
             store[i][1] = value;
             return;
         }
     }
+
+    // TODO propigate request to the next 2 servers
+    // if (propigate) {
+    //     int socket = socket(AF_INET, SOCK_STREAM, 0);
+    //     if (socket < 0) {
+    //         cout << "Error at socket(): " << strerror(errno) << endl;
+    //         return;
+    //     }
+    //     // Connect to 2 servers back and 2 server forward to get all related keys
+    //     for (int i = -2; i <= 2; i++) {
+    //         if (i == 0) {
+    //             // Skip our own server
+    //             continue;
+    //         }
+    //         // Peer IP address
+    //         char *peer = hosts[(hostIndex + i) % 7];
+    //         sockaddr_in service;  // initialising service as sockaddr_in structure
+    //         service.sin_family = AF_INET;
+    //         service.sin_addr.s_addr = inet_addr(peer);
+    //         service.sin_port = htons(port);
+    //         if (connect(socket, (struct sockaddr *)&service, sizeof(service)) < 0) {
+    //             cout << "connect(): Error connecting to server: " << strerror(errno) << endl;
+    //             close(socket);
+    //             return;
+    //         }
+    //         unsigned short int message[3];
+    //         message[0] = WRITE_REQUEST;  // Write Request
+    //         message[1] = key;
+    //         message[2] = value;
+    //         send(socket, message, sizeof(message), 0);
+    //     }
+    //     close(socket);
+    // }
     storeMutex.lock();
     store[storeIndex] = {key, value};
     storeIndex++;
@@ -81,9 +123,107 @@ void writeStore(unsigned short int key, unsigned short int value) {
     return;
 }
 
+int hashKey(unsigned short int key) { return ((key + 7) % 7); }
+
+bool isKeyRelatedToHost(unsigned short int key, int recoverHostIndex) {
+    int hash = hashKey(key);
+    // We only save keys in the same server, copy it to the next 2 servers only
+    for (int i = -2; i <= 0; i++) {
+        if (hash == (recoverHostIndex + i + 7) % 7) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void recoverHost(unsigned short int recoverHostIndex, int peerSocket) {
+    printf("[RH] Help Recovering host %d\n", recoverHostIndex);
+    // Send all store values to host
+    unsigned short int message[3];
+    int keycount = 0;
+    for (int i = 0; i < storeIndex; i++) {
+        if (isKeyRelatedToHost(store[i][0], recoverHostIndex)) {
+            // printf("[RH] Sending key %d to %d\n", store[i][0], recoverHostIndex);
+            // We only send keys that is related to the host only
+            message[0] = RECOVER_WRITE;  // Recover write
+            message[1] = store[i][0];
+            message[2] = store[i][1];
+            send(peerSocket, message, sizeof(message), 0);
+            keycount++;
+        }
+    }
+    close(peerSocket);
+    printf("[RH] Sent %d keys to %d\n", keycount, recoverHostIndex);
+}
+
+// Recover our keys if any from nearby servers
+void recoverKeys() {
+    int recoveredKeys = 0;
+    // Connect to 2 servers back and 2 server forward to get all related keys
+    for (int i = -2; i <= 2; i++) {
+        if (i == 0) {
+            // Skip our own server
+            continue;
+        }
+        int peerSocket = socket(AF_INET, SOCK_STREAM, 0);
+        if (peerSocket < 0) {
+            cout << "[R] Error at socket(): " << strerror(errno) << endl;
+            return;
+        }
+        // Peer IP address
+        char *peer = hosts[(hostIndex + i + 7) % 7];
+        printf("[R] Recovering from %s\n", peer);
+        sockaddr_in service;  // initialising service as sockaddr_in structure
+        service.sin_family = AF_INET;
+        service.sin_addr.s_addr = inet_addr(peer);
+        service.sin_port = htons(port);
+        int retry = 0;
+        while (retry < 5) {
+            if (connect(peerSocket, (struct sockaddr *)&service, sizeof(service)) < 0) {
+                // cout << "[R] connect(): Error connecting to server: " << strerror(errno) << endl;
+                // close(peerSocket);
+                retry++;
+                usleep(2 * 1000000);  // 2 seconds sleep
+                continue;
+            } else {
+                break;
+            }
+        }
+        if (retry >= 5) {
+            cout << "[R] Failed to connect to server: " << peer << " - " << strerror(errno) << endl;
+            close(peerSocket);
+            continue;
+        }
+        // cout << "[R] Connected to server: " << peer << endl;
+        unsigned short int message[3];
+        message[0] = RECOVER_REQUEST;  // Recovery Request
+        message[1] = hostIndex;
+        message[2] = 0;
+        send(peerSocket, message, sizeof(message), 0);
+        while (true) {
+            int rbyteCount = recv(peerSocket, message, sizeof(message), 0);
+            // printf("[R] recv rbyteCount %d\n", rbyteCount);
+            if (rbyteCount < 0) {
+                cout << "[R] Server recv error: " << strerror(errno) << endl;
+                break;
+            } else if (rbyteCount == 0) {
+                // Connection closed
+                cout << "[R] Server recv error: " << strerror(errno) << endl;
+                break;
+            } else {
+                // printf("[R] Recovering from %s, %d,%d,%d\n", peer, message[0], message[1], message[2]);
+                writeStore(message[1], message[2], false);
+                recoveredKeys++;
+            }
+        }
+        close(peerSocket);
+        printf("[R] Recovered %d keys from %s\n", recoveredKeys, peer);
+    }
+}
+
 // Socket server initialized
 void socketServer() {
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0) {
         cout << "Error at socket(): " << strerror(errno) << endl;
         return;
@@ -124,18 +264,23 @@ void socketServer() {
         } else {
             unsigned short int value;
             // Process message here
+            printf("[S] Server recv %d, %d, %d\n", incoming[0], incoming[1], incoming[2]);
             switch (incoming[0]) {
-                case 1:  // Read
+                case READ_REQUEST:  // Read
                     value = readStore(incoming[1]);
                     send(acceptSocket, &value, sizeof(value), 0);
                     break;
-                case 2:  // Write
+                case WRITE_REQUEST:  // Write
                     writeStore(incoming[1], incoming[2]);
                     send(acceptSocket, &incoming[1], sizeof(incoming[1]), 0);
                     break;
-                case 3:  // Recovery
-                    // TODO
-                    break;
+                case RECOVER_REQUEST:  // Recovery Request
+                    // message = {r, hostIndex, null}
+                    thread(recoverHost, incoming[1], acceptSocket).detach();
+                    continue;        // So we dont close the socket, it will be closed once the thread finishes
+                case RECOVER_WRITE:  // Recovery Value received
+                                     // Create a loop to accept a stream of messages from host and write it here
+
                 default:
                     cout << "Invalid message type" << endl;
             }
@@ -147,8 +292,8 @@ void socketServer() {
 void commandThread() {
     char cmd;
     unsigned short int value;
+    printf("Commands Read, Write, Print, Count, Generate, Quit, XRecover [r,w,p,c,g,q,x]:\n");
     while (true) {
-        cout << "Commands Read, Write, Print, Count, Generate, Quit [r,w,p,c,g,q]:";
         cmd = getChar();
         cout << endl;
         switch (cmd) {
@@ -164,12 +309,12 @@ void commandThread() {
             case 'p':
                 // Print store values
                 for (int i = 0; i < storeIndex; i++) {
-                    cout << store[i][0] << ":" << store[i][1] << endl;
+                    cout << store[i][0] << ":" << store[i][1] << ":" << hashKey(store[i][0]) + 1 << endl;
                 }
                 break;
             case 'g':  // Generate
                 for (int i = 0; i < 2000; i++) {
-                    writeStore(randNum(1, 1000), randNum(1, 1000));
+                    writeStore(randNum(1, 100) * 7 + hostIndex, randNum(1, 1000));
                 }
                 break;
             case 'c':
@@ -178,7 +323,12 @@ void commandThread() {
                 break;
             case 'q':
                 // Quit
+                close(serverSocket);
                 exit(0);
+                break;
+            case 'x':
+                // Recover
+                thread(recoverKeys).detach();
                 break;
             default:
                 cout << "Invalid command" << endl;
@@ -186,7 +336,25 @@ void commandThread() {
     }
 }
 
+void segfaultHandler(int signal, siginfo_t *info, void *ucontext) {
+    std::cerr << "Segmentation fault at address: " << info->si_addr << std::endl;
+
+    // Optionally print a backtrace
+    void *array[10];
+    size_t size = backtrace(array, 10);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+    exit(1);
+}
+
 int main(int argc, char *argv[]) {
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = segfaultHandler;
+    sa.sa_flags = SA_SIGINFO;  // Important: get more info
+
+    sigaction(SIGSEGV, &sa, nullptr);
+
     // if no argument is passed, exit
     if (argc < 2) {
         cout << "Project 3 by: Osamah Alzacko & Anurag" << endl;
