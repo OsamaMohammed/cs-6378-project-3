@@ -33,6 +33,7 @@ int serverSocket;
 #define WRITE_REQUEST 2
 #define RECOVER_REQUEST 3
 #define RECOVER_WRITE 4
+#define REPLICATE_WRITE 5
 
 // declar array of strings
 array<char *, 7> hosts = {
@@ -63,6 +64,7 @@ char getChar() {
 
     return ch;
 }
+
 // Read key from store
 // Return value or 0 if not found
 unsigned short int readStore(unsigned short int key) {
@@ -72,55 +74,6 @@ unsigned short int readStore(unsigned short int key) {
         }
     }
     return 0;
-}
-
-// Write key to store
-void writeStore(unsigned short int key, unsigned short int value, bool propigate = true) {
-    for (int i = 0; i < storeIndex; i++) {
-        if (store[i][0] == key) {
-            store[i][1] = value;
-            return;
-        }
-    }
-
-    // TODO propigate request to the next 2 servers
-    // if (propigate) {
-    //     int socket = socket(AF_INET, SOCK_STREAM, 0);
-    //     if (socket < 0) {
-    //         cout << "Error at socket(): " << strerror(errno) << endl;
-    //         return;
-    //     }
-    //     // Connect to 2 servers back and 2 server forward to get all related keys
-    //     for (int i = -2; i <= 2; i++) {
-    //         if (i == 0) {
-    //             // Skip our own server
-    //             continue;
-    //         }
-    //         // Peer IP address
-    //         char *peer = hosts[(hostIndex + i) % 7];
-    //         sockaddr_in service;  // initialising service as sockaddr_in structure
-    //         service.sin_family = AF_INET;
-    //         service.sin_addr.s_addr = inet_addr(peer);
-    //         service.sin_port = htons(port);
-    //         if (connect(socket, (struct sockaddr *)&service, sizeof(service)) < 0) {
-    //             cout << "connect(): Error connecting to server: " << strerror(errno) << endl;
-    //             close(socket);
-    //             return;
-    //         }
-    //         unsigned short int message[3];
-    //         message[0] = WRITE_REQUEST;  // Write Request
-    //         message[1] = key;
-    //         message[2] = value;
-    //         send(socket, message, sizeof(message), 0);
-    //     }
-    //     close(socket);
-    // }
-    storeMutex.lock();
-    store[storeIndex] = {key, value};
-    storeIndex++;
-    storeMutex.unlock();
-    cout << "writing " << key << ":" << value << endl;
-    return;
 }
 
 int hashKey(unsigned short int key) { return ((key + 7) % 7); }
@@ -134,6 +87,86 @@ bool isKeyRelatedToHost(unsigned short int key, int recoverHostIndex) {
         }
     }
     return false;
+}
+
+// Write key to store
+bool writeStore(unsigned short int key, unsigned short int value, bool propigate = true) {
+    // Propigate the request to the next servers
+    bool canMakeWrite = !propigate;
+    if (propigate) {
+        short int propigateNextCount = 0;
+        short int successPropigateCount = 0;
+        if (hashKey(key) == hostIndex) {
+            // We are the designated server, replicate to the next 2 servers
+            propigateNextCount = 2;
+        } else if (hashKey(key) == hostIndex + 1) {
+            // The designated server is down, we will replicate to the next 1 server
+            propigateNextCount = 1;
+        } else {
+            return false;  // Only replica available, no write allowed
+        }
+
+        for (int i = 1; i <= propigateNextCount; i++) {
+            char *peer = hosts[(hostIndex + i + 7) % 7];
+
+            /**
+             * Open connection and send replica write to the peer
+             *
+             */
+            int peerSocket = socket(AF_INET, SOCK_STREAM, 0);
+            if (peerSocket < 0) {
+                cout << "[RW] Error at socket(): " << strerror(errno) << endl;
+                continue;
+            }
+            sockaddr_in service;  // initialising service as sockaddr_in structure
+            service.sin_family = AF_INET;
+            service.sin_addr.s_addr = inet_addr(peer);
+            service.sin_port = htons(port);
+            if (connect(peerSocket, (struct sockaddr *)&service, sizeof(service)) < 0) {
+                // Error connecting to server
+                close(peerSocket);
+                continue;
+            }
+            unsigned short int message[3];
+            message[0] = REPLICATE_WRITE;  // Recovery Request
+            message[1] = key;
+            message[2] = value;
+            send(peerSocket, message, sizeof(message), 0);
+            int rbyteCount = recv(peerSocket, message, sizeof(message), 0);
+            if (rbyteCount < 0) {
+                cout << "[RW] Server recv error: " << strerror(errno) << endl;
+            } else if (rbyteCount == 0) {
+                // Connection closed
+                cout << "[RW] Server recv error: " << strerror(errno) << endl;
+            } else {
+                successPropigateCount++;
+            }
+            close(peerSocket);
+        }
+        canMakeWrite = ((propigateNextCount - successPropigateCount) <=
+                        1);  // if request was propigated at least once, write is allowed
+        printf("[RW] Propigated %d keys to %d servers, allow write: %d\n", successPropigateCount, propigateNextCount,
+               canMakeWrite);
+    }
+
+    if (!canMakeWrite) {
+        return false;  // Propigation failed, we are the only replica online, no write allowed
+    }
+
+    for (int i = 0; i < storeIndex; i++) {
+        if (store[i][0] == key) {
+            // Key already exists, update value
+            store[i][1] = value;
+            return true;
+        }
+    }
+
+    // Key doesnt exist, append it to our keyStore
+    storeMutex.lock();
+    store[storeIndex] = {key, value};
+    storeIndex++;
+    storeMutex.unlock();
+    return true;
 }
 
 void recoverHost(unsigned short int recoverHostIndex, int peerSocket) {
@@ -263,6 +296,7 @@ void socketServer() {
             cout << "Server recv error: " << strerror(errno) << endl;
         } else {
             unsigned short int value;
+            unsigned short int didWrite;
             // Process message here
             printf("[S] Server recv %d, %d, %d\n", incoming[0], incoming[1], incoming[2]);
             switch (incoming[0]) {
@@ -271,16 +305,18 @@ void socketServer() {
                     send(acceptSocket, &value, sizeof(value), 0);
                     break;
                 case WRITE_REQUEST:  // Write
-                    writeStore(incoming[1], incoming[2]);
-                    send(acceptSocket, &incoming[1], sizeof(incoming[1]), 0);
+                    didWrite = writeStore(incoming[1], incoming[2]);
+                    send(acceptSocket, &didWrite, sizeof(didWrite), 0);
                     break;
                 case RECOVER_REQUEST:  // Recovery Request
                     // message = {r, hostIndex, null}
                     thread(recoverHost, incoming[1], acceptSocket).detach();
-                    continue;        // So we dont close the socket, it will be closed once the thread finishes
-                case RECOVER_WRITE:  // Recovery Value received
-                                     // Create a loop to accept a stream of messages from host and write it here
-
+                    continue;  // So we dont close the socket, it will be closed once the thread finishes
+                    break;
+                case REPLICATE_WRITE:                             // Replicate write command
+                    writeStore(incoming[1], incoming[2], false);  // we write it without propigation
+                    send(acceptSocket, &incoming[1], sizeof(incoming[1]), 0);
+                    break;
                 default:
                     cout << "Invalid message type" << endl;
             }
@@ -299,12 +335,12 @@ void commandThread() {
         switch (cmd) {
             case 'r':
                 // Read
-                value = readStore(1);
+                value = readStore(hostIndex);
                 cout << "Value: " << value << endl;
                 break;
             case 'w':
                 // Write
-                writeStore(1, randNum(1, 100));
+                writeStore(hostIndex, randNum(1, 100));
                 break;
             case 'p':
                 // Print store values
@@ -313,7 +349,7 @@ void commandThread() {
                 }
                 break;
             case 'g':  // Generate
-                for (int i = 0; i < 2000; i++) {
+                for (int i = 0; i < 20; i++) {
                     writeStore(randNum(1, 100) * 7 + hostIndex, randNum(1, 1000));
                 }
                 break;
