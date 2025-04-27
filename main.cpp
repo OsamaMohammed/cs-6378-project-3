@@ -241,7 +241,7 @@ void recoverKeys() {
                 break;
             } else if (rbyteCount == 0) {
                 // Connection closed
-                cout << "[R] Server recv error: " << strerror(errno) << endl;
+                // cout << "[R] Server recv error: " << strerror(errno) << endl;
                 break;
             } else {
                 // printf("[R] Recovering from %s, %d,%d,%d\n", peer, message[0], message[1], message[2]);
