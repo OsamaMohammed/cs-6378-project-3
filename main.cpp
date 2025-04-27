@@ -41,27 +41,22 @@ array<char *, 7> hosts = {
 };
 
 int randNum(int min, int max) { return min + rand() % (max - min + 1); }
+
 // Function to get a single character without waiting for Enter
 char getChar() {
     struct termios oldt, newt;
     char ch;
-
     // Get current terminal settings
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-
     // Disable canonical mode and echo
     newt.c_lflag &= ~(ICANON | ECHO);
-
     // Set the new settings immediately
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
     // Read a single character
     read(STDIN_FILENO, &ch, 1);
-
     // Restore old settings
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
     return ch;
 }
 

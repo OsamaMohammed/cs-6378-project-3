@@ -1,0 +1,146 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.15 Chrome/134.0.6998.205 Electron/35.2.1 Safari/537.36" version="26.2.15">
+  <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
+    <mxGraphModel dx="740" dy="435" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-1" value="Server 1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="60" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="0GmwRT1pv6h3LWcMSeLf-1">
+          <mxGeometry x="25" y="90" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-3" value="Server 3" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=30;" vertex="1" parent="1">
+          <mxGeometry x="240" y="40" width="60" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="0GmwRT1pv6h3LWcMSeLf-3">
+          <mxGeometry x="25" y="70" width="10" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-5" value="Server 2" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=30;" vertex="1" parent="1">
+          <mxGeometry x="140" y="40" width="60" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="0GmwRT1pv6h3LWcMSeLf-5">
+          <mxGeometry x="25" y="120" width="10" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-7" value="Server 4" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=30;" vertex="1" parent="1">
+          <mxGeometry x="340" y="40" width="60" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="0GmwRT1pv6h3LWcMSeLf-7">
+          <mxGeometry x="25" y="150" width="10" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-9" value="Server 5" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=30;" vertex="1" parent="1">
+          <mxGeometry x="440" y="40" width="60" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-10" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="0GmwRT1pv6h3LWcMSeLf-9">
+          <mxGeometry x="25" y="200" width="10" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-11" value="Initialize" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;" edge="1" parent="1" target="0GmwRT1pv6h3LWcMSeLf-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="220" y="110" as="sourcePoint" />
+            <mxPoint x="270" y="120" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="220" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-12" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=horizontal;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="267.49" y="130" as="sourcePoint" />
+            <mxPoint x="72.51380952380951" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-14" value="Recover Command" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-12">
+          <mxGeometry x="-0.0703" relative="1" as="geometry">
+            <mxPoint x="-7" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-16" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="75" y="150" as="sourcePoint" />
+            <mxPoint x="265" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-18" value="Stream keys related to server 3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-16">
+          <mxGeometry x="-0.158" relative="1" as="geometry">
+            <mxPoint x="15" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-19" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=horizontal;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="170" as="sourcePoint" />
+            <mxPoint x="175" y="170" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="220" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-20" value="Recover Command" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-19">
+          <mxGeometry x="-0.0703" relative="1" as="geometry">
+            <mxPoint x="-7" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-21" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;curved=0;" edge="1" parent="1" target="0GmwRT1pv6h3LWcMSeLf-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="189.76" as="sourcePoint" />
+            <mxPoint x="270" y="189.76" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="225" y="189.76" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-22" value="Stream keys related to server 3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-21">
+          <mxGeometry x="-0.158" relative="1" as="geometry">
+            <mxPoint x="7" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-23" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=horizontal;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="275" y="200" as="sourcePoint" />
+            <mxPoint x="365" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-24" value="Recover Command" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-23">
+          <mxGeometry x="-0.0703" relative="1" as="geometry">
+            <mxPoint x="3" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-27" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="365" y="222" as="sourcePoint" />
+            <mxPoint x="275" y="222" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-28" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;Stream keys related to server 3&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-27">
+          <mxGeometry x="-0.1516" y="-2" relative="1" as="geometry">
+            <mxPoint x="-3" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-29" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=horizontal;curved=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="275" y="250" as="sourcePoint" />
+            <mxPoint x="465" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-30" value="Recover Command" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-29">
+          <mxGeometry x="-0.0703" relative="1" as="geometry">
+            <mxPoint x="7" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-31" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;curved=0;" edge="1" parent="1" source="0GmwRT1pv6h3LWcMSeLf-10" target="0GmwRT1pv6h3LWcMSeLf-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="270" as="sourcePoint" />
+            <mxPoint x="340" y="270" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0GmwRT1pv6h3LWcMSeLf-32" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;Stream keys related to server 3&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0GmwRT1pv6h3LWcMSeLf-31">
+          <mxGeometry x="-0.1516" y="-2" relative="1" as="geometry">
+            <mxPoint x="-15" y="-6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
