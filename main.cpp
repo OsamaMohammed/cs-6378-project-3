@@ -89,20 +89,19 @@ bool writeStore(unsigned short int key, unsigned short int value, bool propigate
     // Propigate the request to the next servers
     bool canMakeWrite = !propigate;
     if (propigate) {
-        short int propigateNextCount = 0;
+        short int propigateNextCount = 2;
         short int successPropigateCount = 0;
-        if (hashKey(key) == hostIndex) {
-            // We are the designated server, replicate to the next 2 servers
-            propigateNextCount = 2;
-        } else if (hashKey(key) == hostIndex + 1) {
-            // The designated server is down, we will replicate to the next 1 server
-            propigateNextCount = 1;
-        } else {
-            return false;  // Only replica available, no write allowed
-        }
+        printf("[W] Writing %d:%d:%d\n", key, value, hashKey(key));
 
-        for (int i = 1; i <= propigateNextCount; i++) {
-            char *peer = hosts[(hostIndex + i + 7) % 7];
+        int peerIdx;
+        for (int i = 0; i <= 2; i++) {
+            peerIdx = (hashKey(key) + i + 7) % 7;
+            if (peerIdx == hostIndex) {
+                continue;
+            }
+            char *peer = hosts[peerIdx];
+
+            printf("[RW] Propigate to %s\n", peer);
 
             /**
              * Open connection and send replica write to the peer
@@ -119,6 +118,7 @@ bool writeStore(unsigned short int key, unsigned short int value, bool propigate
             service.sin_port = htons(port);
             if (connect(peerSocket, (struct sockaddr *)&service, sizeof(service)) < 0) {
                 // Error connecting to server
+                printf("[RW] Error connecting to server: %s\n", strerror(errno));
                 close(peerSocket);
                 continue;
             }
@@ -135,16 +135,18 @@ bool writeStore(unsigned short int key, unsigned short int value, bool propigate
                 cout << "[RW] Server recv error: " << strerror(errno) << endl;
             } else {
                 successPropigateCount++;
+                printf("[RW] Successful propigation\n");
             }
             close(peerSocket);
         }
-        canMakeWrite = ((propigateNextCount - successPropigateCount) <=
-                        1);  // if request was propigated at least once, write is allowed
+        // if request was propigated at least once, write is allowed
+        canMakeWrite = (successPropigateCount >= 1);
         printf("[RW] Propigated %d keys to %d servers, allow write: %d\n", successPropigateCount, propigateNextCount,
                canMakeWrite);
     }
 
     if (!canMakeWrite) {
+        printf("[W] Propigation failed, we are the only replica online, no write allowed\n");
         return false;  // Propigation failed, we are the only replica online, no write allowed
     }
 
@@ -152,6 +154,7 @@ bool writeStore(unsigned short int key, unsigned short int value, bool propigate
         if (store[i][0] == key) {
             // Key already exists, update value
             store[i][1] = value;
+            printf("[W] Updated key %d:%d:%d\n", key, value, hashKey(key));
             return true;
         }
     }
@@ -161,6 +164,7 @@ bool writeStore(unsigned short int key, unsigned short int value, bool propigate
     store[storeIndex] = {key, value};
     storeIndex++;
     storeMutex.unlock();
+    printf("[W] Appended key %d:%d:%d\n", key, value, hashKey(key));
     return true;
 }
 
@@ -206,7 +210,8 @@ void recoverKeys() {
         service.sin_addr.s_addr = inet_addr(peer);
         service.sin_port = htons(port);
         int retry = 0;
-        while (retry < 5) {
+        int maxRetry = 1;
+        while (retry < maxRetry) {
             if (connect(peerSocket, (struct sockaddr *)&service, sizeof(service)) < 0) {
                 // cout << "[R] connect(): Error connecting to server: " << strerror(errno) << endl;
                 // close(peerSocket);
@@ -217,7 +222,7 @@ void recoverKeys() {
                 break;
             }
         }
-        if (retry >= 5) {
+        if (retry >= maxRetry) {
             cout << "[R] Failed to connect to server: " << peer << " - " << strerror(errno) << endl;
             close(peerSocket);
             continue;
@@ -335,7 +340,7 @@ void commandThread() {
                 break;
             case 'w':
                 // Write
-                writeStore(hostIndex, randNum(1, 100));
+                writeStore(hostIndex + 7 - 1, randNum(1, 100));
                 break;
             case 'p':
                 // Print store values
